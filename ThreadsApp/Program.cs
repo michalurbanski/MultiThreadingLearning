@@ -11,14 +11,16 @@ namespace ThreadsApp
     class Program
     {
         public delegate int BinaryOp(int x, int y);
-        private static Action action; 
+        private static Action action;
+        private static bool isDone; // This one is not a thread safe
 
         static void Main(string[] args)
         {
             //GetBasicThreadInfo(); 
 
             //action = DelegatesExample;
-            action = AsynchronousDelegatesExample;
+            //action = AsynchronousDelegatesExample;
+            action = AsyncCallbackDelegateExample;
 
             ExecuteAction(action);
         }
@@ -66,6 +68,29 @@ namespace ThreadsApp
             int answer = operation.EndInvoke(result);
 
             Console.WriteLine("Answer is {0}", answer);
+        }
+
+        private static void AsyncCallbackDelegateExample()
+        {
+            BinaryOp operation = new BinaryOp(Add);
+            IAsyncResult result = operation.BeginInvoke(10, 5, new AsyncCallback(AddComplete), null);
+
+            // Other work is done here in main method
+            while(!isDone)
+            {
+                Thread.Sleep(1000);
+                Console.WriteLine("Doing more work...");
+            }
+        }
+
+        private static void AddComplete(IAsyncResult asyncResult)
+        {
+            // Async callback finishes in the same thread as delegate - so this approach won't work for
+            // UI based application when UI update is required. 
+            Console.WriteLine("AddCompleted executed on thread {0}", Thread.CurrentThread.ManagedThreadId);
+            Console.WriteLine("Addition is completed");
+
+            isDone = true;
         }
 
         private static int Add(int x, int y)
