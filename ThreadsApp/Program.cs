@@ -71,10 +71,17 @@ namespace ThreadsApp
             Console.WriteLine("Answer is {0}", answer);
         }
 
+        /// <summary>
+        /// Last two parameters of BeginInvoke method are used. Callback method is automatically 
+        /// called when asynchronous operation is finished. 
+        /// </summary>
         private static void AsyncCallbackDelegateExample()
         {
             BinaryOp operation = new BinaryOp(Add);
-            IAsyncResult result = operation.BeginInvoke(10, 5, new AsyncCallback(AddComplete), null);
+
+            string customMessage = "Thanks delegate for adding these numbers";
+            // Last parameter allows to pass any data from calling thread to spawn thread
+            IAsyncResult result = operation.BeginInvoke(10, 5, new AsyncCallback(AddComplete), customMessage);
 
             // Other work is done here in main method
             while(!isDone)
@@ -97,6 +104,11 @@ namespace ThreadsApp
 
             int operationResult = del.EndInvoke(asyncResult);
             Console.WriteLine("Addition result is {0}", operationResult);
+
+            // Get custom data passed to delegate
+            string message = (string)asyncResult.AsyncState; // you have know the type here of passed object data
+
+            Console.WriteLine(message);
 
             isDone = true;
         }
