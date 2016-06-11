@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,6 +90,13 @@ namespace ThreadsApp
             // UI based application when UI update is required. 
             Console.WriteLine("AddCompleted executed on thread {0}", Thread.CurrentThread.ManagedThreadId);
             Console.WriteLine("Addition is completed");
+
+            // Obtain results 
+            AsyncResult result = (AsyncResult)asyncResult;
+            BinaryOp del = (BinaryOp)result.AsyncDelegate; // reference to original delegate can be obtained in this way 
+
+            int operationResult = del.EndInvoke(asyncResult);
+            Console.WriteLine("Addition result is {0}", operationResult);
 
             isDone = true;
         }
