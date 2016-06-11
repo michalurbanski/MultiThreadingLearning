@@ -17,7 +17,8 @@ namespace ThreadsApp
         {
             //GetBasicThreadInfo(); 
 
-            action = DelegatesExample;
+            //action = DelegatesExample;
+            action = AsynchronousDelegatesExample;
 
             ExecuteAction(action);
         }
@@ -28,7 +29,7 @@ namespace ThreadsApp
 
             action();
 
-            Console.WriteLine("Doing more work in main thread");
+            Console.WriteLine("Finishing in main thread");
             Console.ReadLine();
         }
 
@@ -47,6 +48,24 @@ namespace ThreadsApp
         {
             BinaryOp operation = new BinaryOp(Add);
             int answer = operation(10, 5);
+
+            Console.WriteLine("Answer is {0}", answer);
+        }
+
+        /// <summary>
+        /// Using this approach delegate is invoked in a different thread. But still main thread
+        /// is awaiting for delegate to finish its work. 
+        /// </summary>
+        private static void AsynchronousDelegatesExample()
+        {
+            BinaryOp operation = new BinaryOp(Add);
+            IAsyncResult result = operation.BeginInvoke(10, 5, null, null);
+
+            Console.WriteLine("Doing more work in a main thread {0}", Thread.CurrentThread.ManagedThreadId);
+
+            int answer = operation.EndInvoke(result);
+
+            Console.WriteLine("Answer is {0}", answer);
         }
 
         private static int Add(int x, int y)
