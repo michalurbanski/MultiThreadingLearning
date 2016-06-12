@@ -19,5 +19,12 @@ namespace ThreadsApp
 
             Console.WriteLine();
         }
+
+        public void PrintNumbers(object data)
+        {
+            Console.WriteLine(data.ToString());
+
+            PrintNumbers();
+        }
     }
 }

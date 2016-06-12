@@ -19,7 +19,8 @@ namespace ThreadsApp
             //action = DelegatesExample;
             //action = AsynchronousDelegatesExample;
             //action = AsyncCallbackDelegateExample;
-            action = ThreadDelegatesThreadStartExample;
+            //action = ThreadDelegatesThreadStartExample;
+            action = ThreadDelegatesParameterizeThreadStartExample;
 
             ExecuteAction(action);
         }
@@ -104,13 +105,37 @@ namespace ThreadsApp
             Printer p = new Printer();
 
             // Now make another foreground thread
-            Thread backgroundThread = new Thread(new ThreadStart(p.PrintNumbers));
-            backgroundThread.Name = "secondary thread";
-            Console.WriteLine("Is background thread {0}", backgroundThread.IsBackground);
+            Thread anotherThread = new Thread(new ThreadStart(p.PrintNumbers));
+            anotherThread.Name = "secondary thread";
+            Console.WriteLine("Is background thread {0}", anotherThread.IsBackground);
 
-            backgroundThread.Start();
+            anotherThread.Start();
 
             MessageBox.Show("I'm busy", "Main thread window");
+        }
+
+        /// <summary>
+        /// Manual creation of threads using delegate which allows to use additional parameters
+        /// </summary>
+        private static void ThreadDelegatesParameterizeThreadStartExample()
+        {
+            Thread primaryThread = Thread.CurrentThread;
+            primaryThread.Name = "primary thread";
+
+            Console.WriteLine("-> {0} is executing main() method", Thread.CurrentThread.Name);
+
+            // Make worker class 
+            Printer p = new Printer();
+
+            // Now make another foreground thread with parameters
+            string additionalParameter = "Value passed from main method";
+            Thread anotherThread = new Thread(new ParameterizedThreadStart(p.PrintNumbers));
+            anotherThread.Start(additionalParameter); // This is a way to pass additional parameter (this requires parameterized method to access object) 
+
+            Thread.Sleep(1000);
+
+            // Thread is executing and main method can continue
+            Console.WriteLine("Doing more work in main method ...");
         }
 
         private static void AddComplete(IAsyncResult asyncResult)
