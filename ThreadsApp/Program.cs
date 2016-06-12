@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Runtime.Remoting.Messaging;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ThreadsApp
 {
@@ -21,7 +18,8 @@ namespace ThreadsApp
 
             //action = DelegatesExample;
             //action = AsynchronousDelegatesExample;
-            action = AsyncCallbackDelegateExample;
+            //action = AsyncCallbackDelegateExample;
+            action = ThreadDelegatesThreadStartExample;
 
             ExecuteAction(action);
         }
@@ -89,6 +87,30 @@ namespace ThreadsApp
                 Thread.Sleep(1000);
                 Console.WriteLine("Doing more work...");
             }
+        }
+
+        /// <summary>
+        /// Manual creation of threads using delegate which does not allow to use any parameters
+        /// </summary>
+        private static void ThreadDelegatesThreadStartExample()
+        {
+            // Name the current thread
+            Thread primaryThread = Thread.CurrentThread;
+            primaryThread.Name = "primary thread";
+
+            Console.WriteLine("-> {0} is executing main() method", Thread.CurrentThread.Name);
+
+            // Make worker class 
+            Printer p = new Printer();
+
+            // Now make another foreground thread
+            Thread backgroundThread = new Thread(new ThreadStart(p.PrintNumbers));
+            backgroundThread.Name = "secondary thread";
+            Console.WriteLine("Is background thread {0}", backgroundThread.IsBackground);
+
+            backgroundThread.Start();
+
+            MessageBox.Show("I'm busy", "Main thread window");
         }
 
         private static void AddComplete(IAsyncResult asyncResult)
