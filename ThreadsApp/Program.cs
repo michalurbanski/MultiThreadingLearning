@@ -11,6 +11,7 @@ namespace ThreadsApp
         public delegate int BinaryOp(int x, int y);
         private static Action action;
         private static bool isDone; // This one is not a thread safe
+        private static AutoResetEvent waitHandle = new AutoResetEvent(false);
 
         static void Main(string[] args)
         {
@@ -20,7 +21,8 @@ namespace ThreadsApp
             //action = AsynchronousDelegatesExample;
             //action = AsyncCallbackDelegateExample;
             //action = ThreadDelegatesThreadStartExample;
-            action = ThreadDelegatesParameterizeThreadStartExample;
+            //action = ThreadDelegatesParameterizeThreadStartExample;
+            action = ThreadDelegatesWaitForThreadToFinish;
 
             ExecuteAction(action);
         }
@@ -90,10 +92,7 @@ namespace ThreadsApp
             }
         }
 
-        /// <summary>
-        /// Manual creation of threads using delegate which does not allow to use any parameters
-        /// </summary>
-        private static void ThreadDelegatesThreadStartExample()
+        private static Printer ThreadDelegatesBasicSetup()
         {
             // Name the current thread
             Thread primaryThread = Thread.CurrentThread;
@@ -103,6 +102,17 @@ namespace ThreadsApp
 
             // Make worker class 
             Printer p = new Printer();
+
+            return p;
+        }
+
+        /// <summary>
+        /// Manual creation of threads using delegate which does not allow to use any parameters
+        /// No value is returned from thread. 
+        /// </summary>
+        private static void ThreadDelegatesThreadStartExample()
+        {
+            Printer p = ThreadDelegatesBasicSetup();
 
             // Now make another foreground thread
             Thread anotherThread = new Thread(new ThreadStart(p.PrintNumbers));
@@ -115,17 +125,12 @@ namespace ThreadsApp
         }
 
         /// <summary>
-        /// Manual creation of threads using delegate which allows to use additional parameters
+        /// Manual creation of threads using delegate which allows to use additional parameters.
+        /// No value is returned from thread. 
         /// </summary>
         private static void ThreadDelegatesParameterizeThreadStartExample()
         {
-            Thread primaryThread = Thread.CurrentThread;
-            primaryThread.Name = "primary thread";
-
-            Console.WriteLine("-> {0} is executing main() method", Thread.CurrentThread.Name);
-
-            // Make worker class 
-            Printer p = new Printer();
+            Printer p = ThreadDelegatesBasicSetup(); 
 
             // Now make another foreground thread with parameters
             string additionalParameter = "Value passed from main method";
@@ -136,6 +141,23 @@ namespace ThreadsApp
 
             // Thread is executing and main method can continue
             Console.WriteLine("Doing more work in main method ...");
+        }
+
+        /// <summary>
+        /// Executes another thread and waits for this thread to finish - correct approach, not using shared variable. 
+        /// </summary>
+        private static void ThreadDelegatesWaitForThreadToFinish()
+        {
+            Printer p = ThreadDelegatesBasicSetup();
+
+            // Now make another foreground thread with parameters
+            Thread anotherThread = new Thread(new ParameterizedThreadStart(p.PrintNumbersWithWaitHandle));
+            anotherThread.Start(waitHandle);
+
+            // Main execution waits for thread to finish
+            waitHandle.WaitOne();
+
+            Console.WriteLine("Doing more work in main method... ");
         }
 
         private static void AddComplete(IAsyncResult asyncResult)

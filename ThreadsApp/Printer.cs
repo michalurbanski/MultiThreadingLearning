@@ -26,5 +26,14 @@ namespace ThreadsApp
 
             PrintNumbers();
         }
+
+        internal void PrintNumbersWithWaitHandle(object obj)
+        {
+            AutoResetEvent resetEvent = (AutoResetEvent)obj;
+
+            PrintNumbers();
+
+            resetEvent.Set();
+        }
     }
 }
